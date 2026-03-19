@@ -21,9 +21,10 @@ export class AssessmentController {
   constructor(private readonly assessmentService: AssessmentService) { }
 
   @Get('create')
-  @Render('assessments/create')
-  async createForm() {
-    return { title: 'Phiếu Đánh Giá Lão Khoa Toàn Diện' };
+  create() {
+    return {
+      message: 'OK',
+    };
   }
 
   @Post()
