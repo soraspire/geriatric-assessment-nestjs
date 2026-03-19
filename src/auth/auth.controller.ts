@@ -1,27 +1,25 @@
-import { Controller, Get, Post, Render, Res, Request, UseGuards, UseFilters } from '@nestjs/common';
-import { LocalAuthGuard, LoginGuard } from './local-auth.guard';
+import { Controller, Get, Post, Res, Request, UseGuards } from '@nestjs/common';
+import { LocalAuthGuard, AuthenticatedGuard } from './local-auth.guard';
 
-@Controller()
+@Controller('auth')
 export class AuthController {
-  @Get('login')
-  @UseGuards(LoginGuard)
-  @Render('auth/login')
-  showLoginForm() {
-    return { title: 'Đăng nhập' };
+  @Get('me')
+  @UseGuards(AuthenticatedGuard)
+  getMe(@Request() req) {
+    return req.user;
   }
 
   @Post('login')
   @UseGuards(LocalAuthGuard)
-  async login(@Request() req, @Res() res) {
-    return res.redirect('/assessments/management');
+  async login(@Request() req) {
+    return req.user;
   }
 
-  @Get('logout')
   @Post('logout')
   logout(@Request() req, @Res() res) {
     req.logout((err) => {
-      if (err) return res.send(err);
-      res.redirect('/login');
+      if (err) return res.status(500).json({ message: 'Logout failed', error: err });
+      res.json({ message: 'Logged out successfully' });
     });
   }
 }
