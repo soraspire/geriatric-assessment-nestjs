@@ -1,0 +1,240 @@
+<div class="page-header">
+    <h1>Quản lý phiếu đánh giá</h1>
+</div>
+
+<div class="card">
+    <form action="/assessments/management" method="GET" class="filter-section">
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div class="form-group" style="width: 250px;">
+                <label>Tên bệnh nhân</label>
+                <input type="text" name="name" value="{{query.name}}" placeholder="Nhập tên...">
+            </div>
+            <div class="form-group">
+                <label>Tuổi trên</label>
+                <input type="number" name="age" value="{{query.age}}" placeholder="Ví dụ: 60">
+            </div>
+            <div class="form-group">
+                <label>Giới tính</label>
+                <select name="gender" class="custom-select">
+                    <option value="">Tất cả</option>
+                    <option value="1" {{#if (eq query.gender "1")}}selected{{/if}}>Nam</option>
+                    <option value="2" {{#if (eq query.gender "2")}}selected{{/if}}>Nữ</option>
+                </select>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px; margin: 20px 0;">
+            <button type="submit" class="btn-filter">TÌM KIẾM</button>
+            <a href="/assessments/management" class="btn-reset">LÀM MỚI</a>
+        </div>
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Bệnh nhân</th>
+                <th>Tuổi</th>
+                <th>Giới tính</th>
+                <th>CCI</th>
+                <th>Mini-Cog</th>
+                <th>MNA</th>
+                <th>CFS</th>
+                <th>Morse</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each assessments}}
+            <tr>
+                <td>{{add (multiply (subtract ../page 1) ../limit) (add @index 1)}}</td>
+                <td><strong>{{this.patientName}}</strong></td>
+                <td>{{#if this.birthYear}}{{calculateAge this.birthYear}}{{else}}--{{/if}}</td>
+                <td>{{#if (eq this.gender 1)}}Nam{{else}}Nữ{{/if}}</td>
+                <td>
+                    <span class="badge {{#if (gt this.cciTotalScore 0)}}badge-risk{{else}}badge-normal{{/if}}">
+                        {{this.cciTotalScore}}đ
+                    </span>
+                </td>
+                <td>
+                    <span class="badge {{#if (lt minicogTotalScore 3)}}badge-risk{{else}}badge-normal{{/if}}">
+                        {{this.minicogTotalScore}}đ
+                    </span>
+                </td>
+                <td>
+                    <span class="badge {{#if (lt mnaTotalScore 12)}}badge-risk{{else}}badge-normal{{/if}}">
+                        {{this.mnaTotalScore}}đ
+                    </span>
+                </td>
+                <td>
+                    <span class="badge {{#if (gt cfsTotalScore 4)}}badge-risk{{else}}badge-normal{{/if}}">
+                        {{this.cfsTotalScore}}đ
+                    </span>
+                </td>
+                <td>
+                    <span class="badge {{#if (gte morseTotalScore 25)}}badge-risk{{else}}badge-normal{{/if}}">
+                        {{this.morseTotalScore}}đ
+                    </span>
+                </td>
+                <td>
+                    <a href="/assessments/{{this.uuid}}" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: none;">Xem chi tiết</a>
+                </td>
+            </tr>
+            {{else}}
+            <tr>
+                <td colspan="10" style="text-align: center; color: #64748b; padding: 40px;">Không tìm thấy phiếu nào.</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    {{#if (gt totalPages 1)}}
+    <div class="pagination">
+        {{#if (gt page 1)}}
+            <a href="?page={{subtract page 1}}{{#each query}}{{#if (eq @key 'page')}}{{else}}&{{@key}}={{this}}{{/if}}{{/each}}" class="btn-pagination">Trước</a>
+        {{/if}}
+        
+        <div class="page-numbers">
+            {{#each (range 1 totalPages)}}
+                <a href="?page={{this}}{{#each ../query}}{{#if (eq @key 'page')}}{{else}}&{{@key}}={{this}}{{/if}}{{/each}}" class="page-number {{#if (eq this ../page)}}active{{/if}}">{{this}}</a>
+            {{/each}}
+        </div>
+
+        {{#if (lt page totalPages)}}
+            <a href="?page={{add page 1}}{{#each query}}{{#if (eq @key 'page')}}{{else}}&{{@key}}={{this}}{{/if}}{{/each}}" class="btn-pagination">Sau</a>
+        {{/if}}
+    </div>
+    {{/if}}
+</div>
+
+<style>
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-top: 30px;
+        padding: 20px 0;
+    }
+
+    .page-numbers {
+        display: flex;
+        gap: 6px;
+    }
+
+    .btn-pagination, .page-number {
+        padding: 8px 16px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        text-decoration: none;
+        color: #475569;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .page-number:hover, .btn-pagination:hover {
+        background: #f8fafc;
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .page-number.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-group label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #64748b;
+    }
+
+    .form-group input, .form-group select {
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-family: inherit;
+    }
+
+    .custom-select {
+        width: 120px;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='black'%3E%3Cpath d='M5 7l5 5 5-5'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 20px;
+    }
+
+    .btn-filter {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-reset {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid var(--border);
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        padding: 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        font-size: 14px;
+    }
+
+    th {
+        background: #f8fafc;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    tr:hover {
+        background: #f8fafc;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-risk {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .badge-normal {
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+</style>

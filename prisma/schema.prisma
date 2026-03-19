@@ -1,0 +1,197 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  email             String    @unique
+  emailVerifiedAt   DateTime? @map("email_verified_at")
+  password          String
+  rememberToken     String?   @map("remember_token")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Assessment {
+  id                  String            @id @default(auto()) @map("_id") @db.ObjectId
+  uuid                String            @unique @default(uuid())
+  patientName         String            @map("patient_name")
+  birthYear           Int               @map("birth_year")
+  gender              Int               // 1: Nam, 2: Nữ
+  phoneNumber         String?           @map("phone_number")
+  previousJob         String?           @map("previous_job")
+  height              Float
+  weight              Float
+  bmi                 Float
+  
+  // Summary scores
+  cciTotalScore       Int               @default(0) @map("cci_total_score")
+  minicogTotalScore   Int               @default(0) @map("minicog_total_score")
+  mnaTotalScore       Int               @default(0) @map("mna_total_score")
+  cfsTotalScore       Int               @default(0) @map("cfs_total_score")
+  morseTotalScore     Int               @default(0) @map("morse_total_score")
+  gdsTotalScore       Int               @default(0) @map("gds_total_score")
+  
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  // Relationships
+  cciDetails          CCIDetail?
+  minicogDetails      MinicogDetail?
+  mnaDetails          MNADetail?
+  cfsDetails          CFSDetail?
+  morseDetails        MorseDetail?
+  gdsDetails          GDSDetail?
+  otherDetails        OtherDetail?
+
+  @@map("assessments")
+}
+
+model OtherDetail {
+  id                          String      @id @default(auto()) @map("_id") @db.ObjectId
+  assessmentId                String      @unique @map("assessment_id") @db.ObjectId
+  assessment                  Assessment  @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  has_drug_allergy            Boolean     @default(false)
+  drug_allergy_detail         String?
+  has_sensory_impairment      Boolean     @default(false)
+  has_incontinence            Boolean     @default(false)
+  has_pressure_ulcer_risk     Boolean     @default(false)
+  has_caregiver               Boolean     @default(false)
+
+  createdAt                   DateTime    @default(now()) @map("created_at")
+  updatedAt                   DateTime    @updatedAt @map("updated_at")
+
+  @@map("other_details")
+}
+
+model CCIDetail {
+  id                          String      @id @default(auto()) @map("_id") @db.ObjectId
+  assessmentId                String      @unique @map("assessment_id") @db.ObjectId
+  assessment                  Assessment  @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  
+  nhoi_mau_co_tim             Boolean     @default(false)
+  suy_tim                     Boolean     @default(false)
+  benh_mach_mau_ngoai_vi      Boolean     @default(false)
+  benh_mach_nao               Boolean     @default(false)
+  hen_phe_quan_copd           Boolean     @default(false)
+  dai_thao_duong_chua_bien_chung Boolean  @default(false)
+  tram_cam                    Boolean     @default(false)
+  dung_thuoc_chong_dong_mau   Boolean     @default(false)
+  alzheimer_suy_giam_tri_nho  Boolean     @default(false)
+  benh_mo_lien_ket            Boolean     @default(false)
+  tang_huyet_ap               Boolean     @default(false)
+  liet_nua_nguoi              Boolean     @default(false)
+  dai_thao_duong_co_bien_chung Boolean    @default(false)
+  benh_than_trung_binh_nang   Boolean     @default(false)
+  ung_thu_tai_cho             Boolean     @default(false)
+  benh_gan_man_tinh_vua_nang  Boolean     @default(false)
+  ung_thu_di_can              Boolean     @default(false)
+  hiv_aids                   Boolean     @default(false)
+  
+  createdAt                   DateTime    @default(now()) @map("created_at")
+  updatedAt                   DateTime    @updatedAt @map("updated_at")
+
+  @@map("cci_details")
+}
+
+model MinicogDetail {
+  id                  String      @id @default(auto()) @map("_id") @db.ObjectId
+  assessmentId        String      @unique @map("assessment_id") @db.ObjectId
+  assessment          Assessment  @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  
+  clockDrawingScore   Int         @default(0) @map("clock_drawing_score")
+  recallScore         Int         @default(0) @map("recall_score")
+  
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  @@map("minicog_details")
+}
+
+model MNADetail {
+  id                  String      @id @default(auto()) @map("_id") @db.ObjectId
+  assessmentId        String      @unique @map("assessment_id") @db.ObjectId
+  assessment          Assessment  @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  
+  giam_an_uong        Int         @default(0)
+  sut_can             Int         @default(0)
+  kha_nang_van_dong   Int         @default(0)
+  stress_tam_ly       Int         @default(0)
+  van_de_tam_than_kinh Int        @default(0)
+  bmi_score           Int         @default(0)
+  
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  @@map("mna_details")
+}
+
+model CFSDetail {
+  id                  String      @id @default(auto()) @map("_id") @db.ObjectId
+  assessmentId        String      @unique @map("assessment_id") @db.ObjectId
+  assessment          Assessment  @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  
+  cfs_level           Int         @default(1)
+  
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  @@map("cfs_details")
+}
+
+model MorseDetail {
+  id                  String      @id @default(auto()) @map("_id") @db.ObjectId
+  assessmentId        String      @unique @map("assessment_id") @db.ObjectId
+  assessment          Assessment  @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  
+  tien_su_te_nga      Int         @default(0)
+  benh_ly_di_kem      Int         @default(0)
+  duong_truyen_dich   Int         @default(0)
+  ho_tro_di_lai       Int         @default(0)
+  bat_thuong_di_chuyen Int        @default(0)
+  tinh_trang_tinh_than Int        @default(0)
+  
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  @@map("morse_details")
+}
+
+model GDSDetail {
+  id                  String      @id @default(auto()) @map("_id") @db.ObjectId
+  assessmentId        String      @unique @map("assessment_id") @db.ObjectId
+  assessment          Assessment  @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  
+  q1                  Boolean     @default(false)
+  q2                  Boolean     @default(false)
+  q3                  Boolean     @default(false)
+  q4                  Boolean     @default(false)
+  q5                  Boolean     @default(false)
+  q6                  Boolean     @default(false)
+  q7                  Boolean     @default(false)
+  q8                  Boolean     @default(false)
+  q9                  Boolean     @default(false)
+  q10                 Boolean     @default(false)
+  q11                 Boolean     @default(false)
+  q12                 Boolean     @default(false)
+  q13                 Boolean     @default(false)
+  q14                 Boolean     @default(false)
+  q15                 Boolean     @default(false)
+  
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  @@map("gds_details")
+}
