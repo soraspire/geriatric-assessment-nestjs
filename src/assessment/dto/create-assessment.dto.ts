@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsNumber, IsString, IsOptional, IsArray, IsIn, Min, Max, ValidateNested, ArrayNotEmpty, ArrayMinSize, ArrayMaxSize, IsDefined } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
-import { ToNumber } from 'src/common/decorators/to-number.decorator';
+import { ToNumber } from '../../common/decorators/to-number.decorator';
 
 class MainDto {
   @IsNotEmpty({ message: 'Vui lòng nhập họ tên bệnh nhân.' })
