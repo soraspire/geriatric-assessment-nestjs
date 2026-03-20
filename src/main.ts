@@ -47,21 +47,10 @@ async function bootstrap() {
     },
   }));
 
-  // Session & Passport
-  app.use(
-    session({
-      secret: 'my-secret', // Use a real secret in production
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        maxAge: 3600000,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-      },
-    }),
-  );
-  app.use(passport.initialize());
-  app.use(passport.session());
+  // Session & Passport removed (Frontend handles authentication)
+  // app.use(session({...}));
+  // app.use(passport.initialize());
+  // app.use(passport.session());
 
   await app.listen(process.env.PORT ?? 3000);
 }

@@ -24,7 +24,6 @@ export class AssessmentController {
     return assessment;
   }
 
-  @UseGuards(AuthenticatedGuard)
   @Get('management')
   async index(@Req() req) {
     const page = Number(req.query.page) || 1;
